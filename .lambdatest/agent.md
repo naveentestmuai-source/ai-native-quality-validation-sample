@@ -1,4 +1,4 @@
-# LambdaTest Agent Configuration
+# LambdaTest Agent Config
 
 ## Overview
 
