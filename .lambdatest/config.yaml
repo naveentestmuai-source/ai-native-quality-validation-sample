@@ -7,3 +7,4 @@ test_url: "https://naveentestmuai-source.github.io/ai-native-quality-validation-
 use_duplication: false
 generate_all_scenarios: true
 max_test_cases: 50
+  
