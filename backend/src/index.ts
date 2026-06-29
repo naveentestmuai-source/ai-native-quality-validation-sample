@@ -9,6 +9,7 @@ import authRoutes from './routes/auth';
 import listingRoutes from './routes/listings';
 import bookingRoutes from './routes/bookings';
 import reviewRoutes from './routes/reviews';
+import wishlistRoutes from './routes/wishlist';
 
 // Load environment variables
 dotenv.config();
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 // Error handler
 app.use(errorHandler);
