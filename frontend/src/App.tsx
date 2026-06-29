@@ -16,6 +16,8 @@ import BecomeHost from './pages/BecomeHost';
 import Profile from './pages/Profile';
 import Favorites from './pages/Favorites';
 import Bookings from './pages/Bookings';
+import Wishlist from './pages/Wishlist';
+import SearchResults from './pages/SearchResults';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -48,6 +50,8 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/bookings" element={<Bookings />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/search" element={<SearchResults />} />
           </Routes>
           <Toaster
             position="top-center"
