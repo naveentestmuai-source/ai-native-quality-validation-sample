@@ -1,256 +1,122 @@
-﻿# Validate GitHub PRs with KaneAI on TestMu AI (Formerly LambdaTest)
+# Kane-CLI Tests — Airbnb Clone Demo
 
+This directory contains all **kane-cli** test objectives for the Airbnb Clone demo app, structured to show every layer of what kane-cli picks up, generates, and validates.
 
-
-<p align="center">
-
-  <a href="https://www.testmuai.com/"><img src="https://img.shields.io/badge/MADE%20BY%20TestMu%20AI-000000.svg?style=for-the-badge&labelColor=000" alt="Made by TestMu AI"></a>
-
-  <a href="https://community.testmuai.com/"><img src="https://img.shields.io/badge/Join%20the%20community-blueviolet.svg?style=for-the-badge&labelColor=000000" alt="Community"></a>
-
-</p>
-
-
-
-## Getting Started
-
-
-
-[TestMu AI](https://www.testmuai.com/) (Formerly LambdaTest) is the world's first full-stack AI Agentic Quality Engineering platform that empowers teams to test intelligently, smarter, and ship faster. Built for scale, it offers a full-stack testing cloud with 10K+ real devices and 3,000+ browsers. With AI-native test management, MCP servers, and agent-based automation, TestMu AI supports Selenium, Appium, Playwright, and all major frameworks.
-
-
-
-With TestMu AI (Formerly LambdaTest), you can validate GitHub pull requests using KaneAI's AI-native quality validation across real browsers and operating systems.
-
-
-
-- [Sign up on TestMu AI](https://www.testmuai.com/register/) (Formerly LambdaTest).
-
-- Follow the [TestMu AI Documentation](https://www.testmuai.com/support/docs/) for the full setup walkthrough.
-
-
-
-### Prerequisites
-
-
-
-1. **Node.js** (v16 or higher) and **npm** or **yarn**.
-
-2. **Git** installed.
-
-3. A TestMu AI account — sign up here.
-
-4. The TestMu AI (Formerly LambdaTest) Cloud GitHub App installed on your forked repository.
-
-5. GitHub Actions enabled on your fork.
-
-6. GitHub Pages configured (Settings → Pages → branch: **gh-pages**, root directory).
-
-
-
-### Setup
-
-
-
-Fork and clone the repository:
-
-
-
-```bash
-
-git clone https://github.com/LambdaTest/ai-native-quality-validation-sample
-
-cd ai-native-quality-validation-sample
+## What's in here
 
 ```
+kane-tests/
+├── objectives.yaml          ← All test objectives in declarative YAML
+└── scripts/
+    ├── 01-auth-tests.sh     ← Login, register, logout flows (6 objectives)
+    ├── 02-search-listing-tests.sh  ← Search, listing grid, detail page (8 objectives)
+    ├── 03-booking-tests.sh  ← Booking flow, auth gate, history (5 objectives)
+    ├── 04-api-tests.sh      ← Backend REST API smoke tests (5 objectives)
+    ├── 05-smoke-test.sh     ← 3-objective quick gate for PRs
+    └── run-all.sh           ← Runs all suites with combined summary
 
+.testmuai/
+├── context.md               ← App context loaded by kane-cli on every run
+└── variables/
+    └── app.json             ← Parameterized values (URLs, credentials, test data)
 
+.github/workflows/
+└── kane-cli-tests.yml       ← CI: smoke on PR, full suite on merge to main
+```
 
-Install dependencies:
+## Quick start
 
-
+### 1. Install and authenticate
 
 ```bash
+npm install -g @testmuai/kane-cli
+kane-cli login
+```
 
+### 2. Start the app
+
+```bash
+# From repo root:
 npm install
-
-```
-
-
-
-Configure the `.lambdatest/config.yaml` file with your TestMu AI project ID, folder ID, and other configuration values. See the configuration guide for details.
-
-
-
-Set your TestMu AI credentials:
-
-
-
-- For Linux/macOS:
-
-
-
-```bash
-
-export LT_USERNAME="YOUR_USERNAME"
-
-export LT_ACCESS_KEY="YOUR_ACCESS_KEY"
-
-```
-
-
-
-- For Windows:
-
-
-
-```bash
-
-set LT_USERNAME="YOUR_USERNAME"
-
-set LT_ACCESS_KEY="YOUR_ACCESS_KEY"
-
-```
-
-
-
-### Run tests
-
-
-
-1. Create a feature branch in your fork, make changes, and open a pull request targeting your fork's `main` branch.
-
-2. Comment `@KaneAI Validate this PR` on your pull request.
-
-3. KaneAI will automatically trigger AI-native validation and post results on the PR.
-
-
-
-To run tests locally:
-
-
-
-```bash
-
 npm run dev
-
+# Frontend: http://localhost:5173  |  Backend: http://localhost:5000
 ```
 
+### 3. Run a specific suite
 
+```bash
+# Smoke test (fast, 3 objectives)
+bash kane-tests/scripts/05-smoke-test.sh
 
-### Local testing with TestMu AI Tunnel
+# Auth tests
+bash kane-tests/scripts/01-auth-tests.sh
 
+# Search & listing tests
+bash kane-tests/scripts/02-search-listing-tests.sh
 
+# Booking flow tests
+bash kane-tests/scripts/03-booking-tests.sh
 
-To test locally hosted apps, set up the TestMu AI tunnel. OS-specific guides:
+# API tests
+bash kane-tests/scripts/04-api-tests.sh
 
-
-
-- [Local Testing on Windows](https://www.testmuai.com/support/docs/local-testing-for-windows/)
-
-- [Local Testing on macOS](https://www.testmuai.com/support/docs/local-testing-for-macos/)
-
-- [Local Testing on Linux](https://www.testmuai.com/support/docs/local-testing-for-linux/)
-
-
-
-Configure tunnel in your test capabilities:
-
-
-
-```javascript
-
-const capabilities = {
-
-  tunnel: true
-
-};
-
+# Run everything
+bash kane-tests/scripts/run-all.sh
 ```
 
+### 4. Target a different environment
 
+```bash
+KANE_BASE_URL=https://staging.yourdomain.com bash kane-tests/scripts/run-all.sh
+```
 
-## Contributions
+## What kane-cli picks up from this repo
 
+When you run an objective, kane-cli automatically loads:
 
+1. **`.testmuai/context.md`** — project context: routes, credentials, UI patterns, API endpoints. This is what tells the agent about your specific app without you repeating it in every objective.
 
-Contributions are welcome. Open an issue to discuss your idea before submitting a pull request. When reporting bugs, include your Node.js version, OS, and npm version.
+2. **`.testmuai/variables/app.json`** — parameterized values like `{{base_url}}`, `{{guest_email}}`, `{{guest_password}}`. Use `{{varname}}` in any objective string.
 
+3. **`~/.testmuai/kaneai/global-memory.md`** — your global agent context (set once per machine, applies to all projects).
 
+## What kane-cli writes after each run
 
-## TestMu AI (Formerly LambdaTest) Community
+Every `kane-cli run` creates a session directory at:
+```
+~/.testmuai/kaneai/sessions/<session-id>/runs/<n>/
+├── summary.json      ← run_end event (status, summary, final_state, test_url)
+├── steps.ndjson      ← per-step progress events
+└── screenshots/      ← screenshot at each agent step
+```
 
+The `test_url` in `summary.json` links directly to the run in the TestMu AI Test Manager dashboard.
 
+## NDJSON output — what to parse
 
-Connect with testers and developers in the [TestMu AI Community](https://community.testmuai.com/). Ask questions, share what you are building, and discuss best practices in test automation and DevOps.
+With `--agent`, every line of stdout is a JSON event:
 
-  
+```jsonc
+// Progress event (one per agent step)
+{"step": 1, "status": "passed", "remark": "Navigated to home page"}
 
-## TestMu AI (Formerly LambdaTest) Certifications
+// Terminal event — build CI gates on this
+{
+  "type": "run_end",
+  "status": "passed",           // or "failed"
+  "summary": "...",
+  "final_state": {              // all "store as" values
+    "listing_count": "28",
+    "login_ok": "true"
+  },
+  "test_url": "https://test-manager.lambdatest.com/..."
+}
+```
 
+Exit codes: `0` = passed, `1` = failed, `2` = error (auth/setup), `3` = timeout.
 
+## Viewing results in the TestMu AI dashboard
 
-Earn free [TestMu AI Certifications](https://www.testmuai.com/certifications/) for testers, developers, and QA engineers. Validate your skills in Selenium, Cypress, Playwright, Appium, Espresso and more. Industry-recognized, shareable on LinkedIn, and built by practitioners, not marketers.
+After each run, open the `test_url` from the `run_end` event — it links to the full run in Test Manager, including step-by-step screenshots and the AI summary.
 
-
-
-## Learning Resources by TestMu AI (Formerly LambdaTest)
-
-
-
-Learn modern testing through tutorials, guides, videos, and weekly updates:
-
-
-
-* [TestMu AI Blog](https://www.testmuai.com/blog/)
-
-* [TestMu AI Learning Hub](https://www.testmuai.com/learning-hub/)
-
-* [TestMu AI on YouTube](https://www.youtube.com/@TestMuAI)
-
-* [TestMu AI Newsletter](https://www.testmuai.com/newsletter/)
-
-  
-
-## LambdaTest is Now TestMu AI
-
-
-
-On **January 12, 2026**, [LambdaTest evolved to TestMu AI](https://www.testmuai.com/lambdatest-is-now-testmuai/), the world's first fully autonomous **Agentic AI Quality Engineering Platform**.
-
-
-
-Same team. Same infrastructure. Same customer accounts. All existing LambdaTest logins, scripts, capabilities, and integrations continue to work without change.
-
-
-
-ð Find the new home for [LambdaTest](https://www.testmuai.com).
-
-
-
-### How LambdaTest Evolved into TestMu AI
-
-
-
-In 2017, we launched LambdaTest with a simple mission: make testing fast, reliable, and accessible. As LambdaTest grew, we expanded into Test Intelligence, Visual Regression Testing, Accessibility Testing, API Testing, and Performance Testing, covering the full depth of the testing lifecycle.
-
-
-
-As software development entered the AI era, testing had to evolve, too. We rebuilt the architecture to be AI-native from the ground up, with autonomous agents that **plan, author, execute, analyze, and optimize tests** while keeping humans in the loop. The platform integrates with your repos, CI, IDEs, and terminals, continuously learning from every code change and development signal.
-
-
-
-That evolution earned a new name: **TestMu AI**, built for an AI-first future of quality engineering. TestMu is not a new name for us. It is the name of our annual community conference, which has brought together 100,000+ quality engineers to discuss how AI would reshape testing, long before that became an industry norm. 
-
-
-
-What started as a high-performance cloud testing platform has transformed into an AI-native, multi-agent system powering a connected, end-to-end quality layer. That evolution defined a new identity: LambdaTest evolved into TestMu AI, built for an AI-first future of quality engineering.
-
-
-
-## Support
-
-
-
-Got a question? Email [support@testmuai.com](mailto:support@testmuai.com) or chat with us 24x7 from our chat portal.
-
+Or browse all runs: **TestMu AI → Test Manager → KaneAI → Sessions**

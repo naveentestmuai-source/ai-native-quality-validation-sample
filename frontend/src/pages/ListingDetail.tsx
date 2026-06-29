@@ -17,6 +17,7 @@ import {
 import { listingService } from '../services/listingService';
 import { bookingService } from '../services/bookingService';
 import { useAuthStore } from '../store/authStore';
+import ReviewSection from '../components/ReviewSection';
 import { differenceInDays } from 'date-fns';
 
 const amenityIcons: Record<string, any> = {
@@ -29,7 +30,7 @@ const amenityIcons: Record<string, any> = {
 const ListingDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   const [, setSelectedImage] = useState(0);
   const [checkIn, setCheckIn] = useState<Date | null>(null);
@@ -193,41 +194,12 @@ const ListingDetail = () => {
             </div>
           </div>
 
-          {/* Reviews */}
-          {reviews && reviews.length > 0 && (
-            <div className="pb-8 border-b border-gray-200">
-              <h3 className="text-xl font-semibold mb-6">
-                <FaStar className="inline text-black mr-1" />
-                {listing.rating} · {reviews.length} reviews
-              </h3>
-              <div className="space-y-6">
-                {reviews.slice(0, 6).map((review) => (
-                  <div key={review._id}>
-                    <div className="flex items-center space-x-3 mb-2">
-                      {review.userId.avatar ? (
-                        <img
-                          src={review.userId.avatar}
-                          alt={review.userId.firstName}
-                          className="w-10 h-10 rounded-full"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-300" />
-                      )}
-                      <div>
-                        <p className="font-semibold">
-                          {review.userId.firstName} {review.userId.lastName}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {new Date(review.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-gray-600">{review.comment}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Reviews & Submit Review */}
+          <ReviewSection
+            listingId={id!}
+            isLoggedIn={isAuthenticated}
+            currentUserId={user?.id || user?._id}
+          />
         </div>
 
         {/* Booking Card */}
