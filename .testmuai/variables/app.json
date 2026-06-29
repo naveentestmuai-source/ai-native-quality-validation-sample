@@ -1,0 +1,44 @@
+{
+  "base_url": {
+    "value": "http://localhost:5173",
+    "description": "Frontend base URL — override with KANE_BASE_URL env var in CI"
+  },
+  "api_url": {
+    "value": "http://localhost:5000",
+    "description": "Backend API base URL"
+  },
+  "guest_email": {
+    "value": "guest@example.com",
+    "description": "Demo guest user email"
+  },
+  "guest_password": {
+    "value": "guest123",
+    "secret": true,
+    "description": "Demo guest user password"
+  },
+  "host_email": {
+    "value": "host@example.com",
+    "description": "Demo host user email"
+  },
+  "host_password": {
+    "value": "host123",
+    "secret": true,
+    "description": "Demo host user password"
+  },
+  "test_location": {
+    "value": "Miami",
+    "description": "Location used in search test scenarios"
+  },
+  "test_checkin": {
+    "value": "2025-08-01",
+    "description": "Check-in date for booking tests (YYYY-MM-DD)"
+  },
+  "test_checkout": {
+    "value": "2025-08-05",
+    "description": "Check-out date for booking tests (YYYY-MM-DD)"
+  },
+  "test_guests": {
+    "value": "2",
+    "description": "Guest count for booking tests"
+  }
+}

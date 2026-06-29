@@ -1,0 +1,233 @@
+# =============================================================================
+# kane-tests/objectives.yaml
+# Declarative test objective definitions for the Airbnb Clone demo.
+# These map 1:1 to the shell scripts but in a structured format that
+# can be consumed by CI pipelines or dashboard integrations.
+# =============================================================================
+
+meta:
+  app: airbnb-clone-demo
+  base_url: "{{base_url}}"        # resolved from .testmuai/variables/app.json
+  framework: kane-cli
+  version: "1.0.0"
+
+suites:
+
+  # ── Smoke ─────────────────────────────────────────────────────────────────
+  - id: smoke
+    name: "Smoke Test"
+    description: "3 quick checks — run on every PR to gate merge"
+    tests:
+      - id: smoke_01
+        name: "App loads with listings"
+        objective: >
+          Go to {{base_url}}, store whether property listing cards are visible
+          on the home page as 'app_loaded', store the count of visible listings
+          as 'listing_count'
+        tags: [smoke, critical]
+
+      - id: smoke_02
+        name: "Guest login works"
+        objective: >
+          Go to {{base_url}}/login, enter {{guest_email}} in the email field,
+          enter {{guest_password}} in the password field, click Sign In,
+          store whether login succeeds as 'login_ok'
+        tags: [smoke, critical, auth]
+
+      - id: smoke_03
+        name: "Listing detail page loads"
+        objective: >
+          Go to {{base_url}}, click the first listing card, store the listing
+          title as 'detail_title', store whether a Reserve button is visible as
+          'detail_complete'
+        tags: [smoke, critical]
+
+  # ── Auth ──────────────────────────────────────────────────────────────────
+  - id: auth
+    name: "Authentication Tests"
+    description: "Login, registration, logout — positive and negative"
+    tests:
+      - id: auth_01
+        name: "Valid guest login"
+        objective: >
+          Go to {{base_url}}/login, enter {{guest_email}} in the email field,
+          enter {{guest_password}} in the password field, click the Sign In button,
+          store whether the home page or dashboard loads as 'login_success'
+        tags: [auth, positive]
+
+      - id: auth_02
+        name: "Invalid login — wrong password"
+        objective: >
+          Go to {{base_url}}/login, enter {{guest_email}} in the email field,
+          enter 'wrongpassword' in the password field, click the Sign In button,
+          store the error message text as 'error_message'
+        tags: [auth, negative]
+
+      - id: auth_03
+        name: "Empty form submission shows validation"
+        objective: >
+          Go to {{base_url}}/login, click the Sign In button without entering
+          any credentials, store whether a validation error appears as
+          'empty_form_error'
+        tags: [auth, negative, validation]
+
+      - id: auth_04
+        name: "New user registration"
+        objective: >
+          Go to {{base_url}}/register, enter 'Test' in the first name field,
+          enter 'User' in the last name field, enter a unique email in the email
+          field, enter 'TestPass123!' in the password field, click Create Account,
+          store whether registration succeeds as 'registration_result'
+        tags: [auth, positive, registration]
+
+      - id: auth_05
+        name: "Host user login"
+        objective: >
+          Go to {{base_url}}/login, enter {{host_email}} in the email field,
+          enter {{host_password}} in the password field, click the Sign In button,
+          store whether the user is authenticated as 'host_login_success'
+        tags: [auth, positive]
+
+      - id: auth_06
+        name: "Login then logout"
+        objective: >
+          Go to {{base_url}}/login, log in as {{guest_email}} with password
+          {{guest_password}}, find and click the logout option in the navigation,
+          store whether the user is returned to home or login as 'logout_result'
+        tags: [auth, positive, logout]
+
+  # ── Search & Listings ─────────────────────────────────────────────────────
+  - id: search
+    name: "Search & Listings Tests"
+    description: "Home page, search filters, listing cards, detail page"
+    tests:
+      - id: search_01
+        name: "Home page shows listing grid"
+        objective: >
+          Go to {{base_url}}, store the number of property listing cards
+          visible on the page as 'listing_count'
+        tags: [search, smoke]
+
+      - id: search_02
+        name: "Location search filters results"
+        objective: >
+          Go to {{base_url}}, type '{{test_location}}' into the location search
+          input, press Enter or click search, store the number of listing cards
+          visible as 'filtered_count'
+        tags: [search, filter]
+
+      - id: search_03
+        name: "No results shows empty state"
+        objective: >
+          Go to {{base_url}}, type 'ZZZNonExistentPlace999' into the location
+          search input, press Enter, store whether a no-results message appears
+          as 'empty_state_shown'
+        tags: [search, negative, edge-case]
+
+      - id: search_04
+        name: "Listing card displays key metadata"
+        objective: >
+          Go to {{base_url}}, find the first listing card, store its title as
+          'first_listing_title', store the price as 'first_listing_price',
+          store the rating as 'first_listing_rating'
+        tags: [search, listing-card]
+
+      - id: search_05
+        name: "Listing card click opens detail"
+        objective: >
+          Go to {{base_url}}, click the first listing card, store the URL after
+          navigation as 'detail_url', store the listing title on the detail page
+          as 'detail_title'
+        tags: [search, navigation]
+
+      - id: search_06
+        name: "Detail page shows amenities and specs"
+        objective: >
+          Go to {{base_url}}, click the first listing card, store the number of
+          bedrooms as 'bedrooms', store the number of bathrooms as 'bathrooms',
+          store whether an amenities section is visible as 'has_amenities'
+        tags: [search, detail]
+
+      - id: search_07
+        name: "Detail page shows booking form"
+        objective: >
+          Go to {{base_url}}, click the first listing card, store whether a
+          booking form or Reserve button is visible as 'booking_form_visible'
+        tags: [search, detail, booking]
+
+  # ── Booking Flow ──────────────────────────────────────────────────────────
+  - id: booking
+    name: "Booking Flow Tests"
+    description: "Reservation initiation, auth gate, bookings history"
+    tests:
+      - id: booking_01
+        name: "Reserve without auth prompts login"
+        objective: >
+          Go to {{base_url}}, click the first listing card, click the Reserve
+          button while unauthenticated, store whether a login prompt or redirect
+          appears as 'auth_required_for_booking'
+        tags: [booking, negative, auth-gate]
+
+      - id: booking_02
+        name: "Authenticated user can initiate booking"
+        objective: >
+          Go to {{base_url}}/login, log in as {{guest_email}} with password
+          {{guest_password}}, navigate to the home page, click the first listing
+          card, enter '{{test_checkin}}' as check-in date, enter
+          '{{test_checkout}}' as check-out date, click Reserve, store the result
+          as 'booking_result'
+        tags: [booking, positive, e2e]
+
+      - id: booking_03
+        name: "Bookings page shows history"
+        objective: >
+          Go to {{base_url}}/login, log in as {{guest_email}} with password
+          {{guest_password}}, navigate to {{base_url}}/bookings, store whether
+          a bookings list is visible as 'bookings_visible', store the count of
+          bookings as 'booking_count'
+        tags: [booking, positive]
+
+      - id: booking_04
+        name: "Detail shows price calculation"
+        objective: >
+          Go to {{base_url}}, click the first listing card, store the nightly
+          price as 'nightly_price', store whether a total price section is
+          visible as 'total_price_visible'
+        tags: [booking, detail, pricing]
+
+  # ── API ───────────────────────────────────────────────────────────────────
+  - id: api
+    name: "API Tests"
+    description: "Backend REST endpoint smoke tests via browser navigation"
+    tests:
+      - id: api_01
+        name: "GET /api/listings returns data"
+        objective: >
+          Go to {{api_url}}/api/listings in the browser, store whether the page
+          shows JSON array data as 'listings_api_ok', store the approximate
+          listing count as 'listings_count'
+        tags: [api, listings]
+
+      - id: api_02
+        name: "GET /api/listings?location=Miami filters"
+        objective: >
+          Go to {{api_url}}/api/listings?location=Miami in the browser, store
+          whether the response contains Miami listings as 'miami_filter_ok',
+          store the count as 'miami_count'
+        tags: [api, listings, filter]
+
+      - id: api_03
+        name: "GET /api/listings/:id returns single listing"
+        objective: >
+          Go to {{api_url}}/api/listings/1 in the browser, store whether a
+          single listing object with title and price is returned as
+          'single_listing_ok', store the listing title as 'listing_title'
+        tags: [api, listings]
+
+      - id: api_04
+        name: "GET /api/bookings without auth returns 401"
+        objective: >
+          Go to {{api_url}}/api/bookings in the browser, store the HTTP status
+          or error message as 'bookings_unauth_response', store whether it
+          indicates unauthorized access as 'is_401'
+        tags: [api, bookings, auth, negative]
