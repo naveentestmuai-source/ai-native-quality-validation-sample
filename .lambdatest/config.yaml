@@ -4,3 +4,6 @@ folder_id: "01KW9KBWEX9Y1VYKC8454PF3G0"
 assignee: 3116828
 environment_id: 285424
 test_url: "https://naveentestmuai-source.github.io/ai-native-quality-validation-sample/#/"
+use_duplication: false
+generate_all_scenarios: true
+max_test_cases: 50
