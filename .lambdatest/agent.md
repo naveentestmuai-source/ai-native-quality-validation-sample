@@ -3,7 +3,7 @@
 ## IMPORTANT: Generate ALL scenarios listed below as individual test cases.
 ## Do not stop after one scenario. Generate every numbered test case independently.
 ## App URL: https://naveentestmuai-source.github.io/ai-native-quality-validation-sample/#/
-## All passwords: password123
+## All passwords: password123  
 
 ---
 
