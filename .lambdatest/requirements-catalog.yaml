@@ -1,0 +1,247 @@
+# =============================================================================
+# requirements-catalog.yaml
+# Requirement → Scenario → Test Case traceability catalog for the
+# Airbnb Clone demo app, formatted to match TestMu AI's agentic pipeline
+# "scenario catalog" / requirement-vs-test traceability structure
+# (the AC-001, AC-002... pattern shown in the KaneAI Functional
+# Verification dashboard).
+#
+# This file is the single source of truth the agentic pipeline should read
+# from to determine: what requirements exist, what scenarios cover them,
+# which test cases were generated, and — on later runs — which scenarios
+# are impacted by a given code diff (the "800 out of 4,000" selection step).
+# =============================================================================
+
+catalog_version: "1.0.0"
+app: airbnb-clone-demo
+repository: naveentestmuai-source/ai-native-quality-validation-sample
+last_updated: "2026-06-30"
+
+# ─────────────────────────────────────────────────────────────────────────
+# REQUIREMENT GROUP: Property Reviews
+# ─────────────────────────────────────────────────────────────────────────
+requirements:
+
+  - requirement_id: REQ-REVIEWS-001
+    title: "Authenticated User Can Submit a Property Review"
+    description: >
+      As a logged-in guest, I want to leave a star rating and written review
+      on a property listing, so that other guests can see past feedback
+      before booking.
+    source: "Jira-style requirement (manually authored for demo)"
+    priority: high
+    risk_level: medium
+    acceptance_criteria:
+      - ac_id: AC-001
+        text: "User can submit a review with a star rating (1-5) and a comment (10-500 characters) from the listing detail page."
+        status: covered
+      - ac_id: AC-002
+        text: "User cannot submit a review without selecting a star rating."
+        status: covered
+      - ac_id: AC-003
+        text: "User cannot submit a review with a comment under 10 characters."
+        status: covered
+      - ac_id: AC-004
+        text: "User cannot submit more than one review per listing."
+        status: covered
+      - ac_id: AC-005
+        text: "Unauthenticated users see a sign-in prompt instead of the review form."
+        status: covered
+      - ac_id: AC-006
+        text: "After successful submission, the review appears in the listing's review list with reviewer name, star rating, and comment."
+        status: covered
+      - ac_id: AC-007
+        text: "The listing's average rating and rating breakdown update to reflect the new review."
+        status: covered
+      - ac_id: AC-008
+        text: "A user can delete their own review but not another user's review."
+        status: covered
+    scenarios:
+      - scenario_id: SCN-REVIEWS-01
+        title: "Submit review succeeds with valid rating and comment"
+        maps_to_ac: [AC-001, AC-006, AC-007]
+        type: positive
+        test_case_id: TC-AUTO-001
+      - scenario_id: SCN-REVIEWS-02
+        title: "Submit review fails with no star rating selected"
+        maps_to_ac: [AC-002]
+        type: negative
+        test_case_id: TC-AUTO-002
+      - scenario_id: SCN-REVIEWS-03
+        title: "Submit review fails with comment under 10 characters"
+        maps_to_ac: [AC-003]
+        type: negative
+        test_case_id: TC-AUTO-003
+      - scenario_id: SCN-REVIEWS-04
+        title: "Duplicate review on same listing is rejected"
+        maps_to_ac: [AC-004]
+        type: negative
+        test_case_id: TC-AUTO-004
+      - scenario_id: SCN-REVIEWS-05
+        title: "Unauthenticated user sees sign-in prompt instead of review form"
+        maps_to_ac: [AC-005]
+        type: edge
+        test_case_id: TC-AUTO-005
+      - scenario_id: SCN-REVIEWS-06
+        title: "User deletes their own review successfully"
+        maps_to_ac: [AC-008]
+        type: positive
+        test_case_id: TC-AUTO-006
+      - scenario_id: SCN-REVIEWS-07
+        title: "User cannot delete another user's review"
+        maps_to_ac: [AC-008]
+        type: negative
+        test_case_id: TC-AUTO-007
+    impacted_files:
+      - backend/src/routes/reviews.ts
+      - frontend/src/components/ReviewCard.tsx
+      - frontend/src/components/ReviewForm.tsx
+      - frontend/src/components/ReviewSection.tsx
+      - frontend/src/pages/ListingDetail.tsx
+
+  # ───────────────────────────────────────────────────────────────────────
+  # REQUIREMENT GROUP: Wishlist
+  # ───────────────────────────────────────────────────────────────────────
+  - requirement_id: REQ-WISHLIST-001
+    title: "Authenticated User Can Manage a Property Wishlist"
+    description: >
+      As a logged-in user, I want to save and remove properties from a
+      personal wishlist, so that I can revisit them later without
+      re-searching.
+    source: "Jira-style requirement (manually authored for demo)"
+    priority: medium
+    risk_level: low
+    acceptance_criteria:
+      - ac_id: AC-101
+        text: "Unauthenticated users are redirected to login when visiting the wishlist page."
+        status: covered
+      - ac_id: AC-102
+        text: "Authenticated user with no saved properties sees an empty state with a call-to-action."
+        status: covered
+      - ac_id: AC-103
+        text: "User can add a listing to their wishlist from a listing card or detail page."
+        status: covered
+      - ac_id: AC-104
+        text: "User can remove a listing from their wishlist, and it is no longer shown."
+        status: covered
+      - ac_id: AC-105
+        text: "Adding the same listing twice does not create duplicate wishlist entries."
+        status: covered
+    scenarios:
+      - scenario_id: SCN-WISHLIST-01
+        title: "Unauthenticated user redirected to login from wishlist page"
+        maps_to_ac: [AC-101]
+        type: negative
+        test_case_id: TC-AUTO-101
+      - scenario_id: SCN-WISHLIST-02
+        title: "Empty wishlist shows call to action"
+        maps_to_ac: [AC-102]
+        type: edge
+        test_case_id: TC-AUTO-102
+      - scenario_id: SCN-WISHLIST-03
+        title: "Add listing to wishlist from card heart icon"
+        maps_to_ac: [AC-103]
+        type: positive
+        test_case_id: TC-AUTO-103
+      - scenario_id: SCN-WISHLIST-04
+        title: "Remove listing from wishlist"
+        maps_to_ac: [AC-104]
+        type: positive
+        test_case_id: TC-AUTO-104
+      - scenario_id: SCN-WISHLIST-05
+        title: "Adding duplicate listing is rejected with 409"
+        maps_to_ac: [AC-105]
+        type: negative
+        test_case_id: TC-AUTO-105
+    impacted_files:
+      - backend/src/routes/wishlist.ts
+      - frontend/src/pages/Wishlist.tsx
+      - frontend/src/pages/SearchResults.tsx
+
+  # ───────────────────────────────────────────────────────────────────────
+  # REQUIREMENT GROUP: Search & Filters
+  # ───────────────────────────────────────────────────────────────────────
+  - requirement_id: REQ-SEARCH-001
+    title: "User Can Search and Filter Listings"
+    description: >
+      As a visitor, I want to search by location and filter/sort results,
+      so that I can find a property matching my needs quickly.
+    source: "Jira-style requirement (manually authored for demo)"
+    priority: high
+    risk_level: medium
+    acceptance_criteria:
+      - ac_id: AC-201
+        text: "Search by location filters the listing grid to matching results."
+        status: covered
+      - ac_id: AC-202
+        text: "Search with no matches shows an empty state."
+        status: covered
+      - ac_id: AC-203
+        text: "User can filter results by property type."
+        status: covered
+      - ac_id: AC-204
+        text: "User can filter results by min/max price."
+        status: covered
+      - ac_id: AC-205
+        text: "User can sort results by price or rating."
+        status: covered
+      - ac_id: AC-206
+        text: "Clear filters resets all active filters and sort order."
+        status: covered
+    scenarios:
+      - scenario_id: SCN-SEARCH-01
+        title: "Location search filters listing grid"
+        maps_to_ac: [AC-201]
+        type: positive
+        test_case_id: TC-AUTO-201
+      - scenario_id: SCN-SEARCH-02
+        title: "No matching location shows empty state"
+        maps_to_ac: [AC-202]
+        type: negative
+        test_case_id: TC-AUTO-202
+      - scenario_id: SCN-SEARCH-03
+        title: "Property type filter narrows results correctly"
+        maps_to_ac: [AC-203]
+        type: positive
+        test_case_id: TC-AUTO-203
+      - scenario_id: SCN-SEARCH-04
+        title: "Min/max price filter excludes out-of-range listings"
+        maps_to_ac: [AC-204]
+        type: positive
+        test_case_id: TC-AUTO-204
+      - scenario_id: SCN-SEARCH-05
+        title: "Sort by price low-to-high reorders results"
+        maps_to_ac: [AC-205]
+        type: positive
+        test_case_id: TC-AUTO-205
+      - scenario_id: SCN-SEARCH-06
+        title: "Clear filters resets to full result set"
+        maps_to_ac: [AC-206]
+        type: positive
+        test_case_id: TC-AUTO-206
+    impacted_files:
+      - frontend/src/pages/SearchResults.tsx
+      - frontend/src/pages/Home.tsx
+
+# ─────────────────────────────────────────────────────────────────────────
+# RISK CATEGORIZATION (for the priority/risk dashboard step in the pipeline)
+# ─────────────────────────────────────────────────────────────────────────
+risk_categorization:
+  high_risk_requirements:
+    - REQ-REVIEWS-001   # touches both backend validation and money-adjacent trust signals (ratings)
+  medium_risk_requirements:
+    - REQ-SEARCH-001    # high-traffic path, affects discovery/conversion
+  low_risk_requirements:
+    - REQ-WISHLIST-001  # non-critical convenience feature
+
+# ─────────────────────────────────────────────────────────────────────────
+# COVERAGE GAPS (the pipeline should populate/update this section after
+# each run — left as known starting gaps for the first pipeline execution)
+# ─────────────────────────────────────────────────────────────────────────
+known_coverage_gaps:
+  - requirement_id: REQ-REVIEWS-001
+    gap: "No scenario yet for editing an existing review after submission."
+  - requirement_id: REQ-WISHLIST-001
+    gap: "No scenario yet for wishlist behavior when a listing is deleted/unavailable."
+  - requirement_id: REQ-SEARCH-001
+    gap: "No scenario yet for combined filters (property type + price range) used together."
