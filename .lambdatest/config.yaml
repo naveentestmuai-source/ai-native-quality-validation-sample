@@ -1,4 +1,4 @@
-# =============================================================================
+# ==============================================================================
 # .lambdatest/config.yaml
 # CORRECTED VERSION — consolidates every fix found during debugging:
 #   1. folder_id points to the NEW dedicated folder (not the old
