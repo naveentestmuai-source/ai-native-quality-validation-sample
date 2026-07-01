@@ -1,0 +1,115 @@
+# =============================================================================
+# .github/workflows/kane-cli-tests.yml
+# Runs Kane-CLI test suites on every pull request and on pushes to main.
+# Requires repository secrets: LT_USERNAME, LT_ACCESS_KEY
+# =============================================================================
+
+name: Kane-CLI Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Test suite to run (smoke | auth | search | booking | api | all)"
+        required: false
+        default: "smoke"
+      base_url:
+        description: "Override base URL (default: preview deployment)"
+        required: false
+        default: ""
+
+concurrency:
+  group: kane-cli-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Smoke gate — runs fast on every PR ──────────────────────────────────────
+  smoke:
+    name: "Smoke Test (PR gate)"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install kane-cli
+        run: npm install -g @testmuai/kane-cli
+
+      - name: Authenticate kane-cli
+        run: |
+          kane-cli login \
+            --username "${{ secrets.LT_USERNAME }}" \
+            --access-key "${{ secrets.LT_ACCESS_KEY }}"
+
+      - name: Resolve base URL
+        id: url
+        run: |
+          # Use the GitHub Pages preview URL for this PR branch if available,
+          # otherwise fall back to the static demo URL.
+          INPUT_URL="${{ github.event.inputs.base_url }}"
+          PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          BASE_URL="${INPUT_URL:-$PAGES_URL}"
+          echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
+          echo "Using base URL: $BASE_URL"
+
+      - name: Run smoke tests
+        env:
+          KANE_BASE_URL: ${{ steps.url.outputs.base_url }}
+        run: bash kane-tests/scripts/05-smoke-test.sh
+
+  # ── Full suite — runs on merge to main ──────────────────────────────────────
+  full-suite:
+    name: "Full Test Suite"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [auth, search, booking, api]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install kane-cli
+        run: npm install -g @testmuai/kane-cli
+
+      - name: Authenticate kane-cli
+        run: |
+          kane-cli login \
+            --username "${{ secrets.LT_USERNAME }}" \
+            --access-key "${{ secrets.LT_ACCESS_KEY }}"
+
+      - name: Resolve base URL
+        id: url
+        run: |
+          INPUT_URL="${{ github.event.inputs.base_url }}"
+          PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          BASE_URL="${INPUT_URL:-$PAGES_URL}"
+          echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Run ${{ matrix.suite }} suite
+        env:
+          KANE_BASE_URL: ${{ steps.url.outputs.base_url }}
+        run: bash kane-tests/scripts/run-all.sh --suite ${{ matrix.suite }}
+
+      - name: Upload run logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kane-logs-${{ matrix.suite }}
+          path: ~/.testmuai/kaneai/sessions/
+          retention-days: 7

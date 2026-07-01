@@ -1,6 +1,39 @@
-# LambdaTest AI Cloud Configuration
-project_id: "01KG2C7VC7J2WY64Q55AB2FSW4"
-folder_id: "01KS2VYVFH681ZM9RBQPDV1C7V"
+# ==============================================================================
+# .lambdatest/config.yaml
+# CORRECTED VERSION — consolidates every fix found during debugging:
+#   1. folder_id points to the NEW dedicated folder (not the old
+#      GitHubIntegration folder that had unrelated test cases)
+#   2. test_url points to the OFFICIAL working demo app
+#      (the GitHub Pages deployment was never live — broken build)
+#   3. Explicit flags added to discourage early-stopping after 1 scenario
+#
+# IMPORTANT CONTEXT FOR WHOEVER USES THIS NEXT:
+# The PR-comment trigger ("@KaneAI Validate this PR") only generates test
+# cases for what it can determine changed AND what it can verify live on
+# test_url. It does NOT read every scenario out of agent.md as a checklist
+# — that file is read for context, not executed as a task list. To get the
+# full 40-50 scenario generation Mudassar demoed, that requires using the
+# Agentic Pipeline / Kane AI CLI flow directly (see opus-trigger.md and
+# requirements-catalog.yaml in this kit), not the basic PR-comment trigger.
+# =============================================================================
+
+project_id: "01KWC9Q78SN7MMME9Y1S12VDKD"
+folder_id: "01KWC9QF7DDHEC41VFRR6K1JQB"
 assignee: 3116828
 environment_id: 285424
-test_url: "https://demo.lambdatestinternal.com"
+
+# Official, confirmed-working demo URL (from TestMu AI's own
+# INSTALLATION.md). Our fork's GitHub Pages deployment is NOT live —
+# the build was failing as of 2026-06-30 due to TypeScript errors in the
+# new Wishlist/SearchResults/Reviews components. Until that's fixed and
+# verified live, do not point test_url at the GitHub Pages URL.
+test_url: "https://demo.lambdatestinternal.com/"
+
+# Test generation behavior
+use_duplication: false
+generate_all_scenarios: true
+max_test_cases: 50
+
+# Reference to the requirement catalog for traceability (used by the
+# agentic pipeline, not the basic PR-comment trigger)
+requirements_catalog_path: "requirements-catalog.yaml"
